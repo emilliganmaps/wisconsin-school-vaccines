@@ -2,7 +2,11 @@ $(document).click(function(){
     $("#welcomeWrapper").hide();
 });
 
+
+
 var counties = L.layerGroup(Counties);
+
+
 
 //style counties layer
 function style(feature){
@@ -16,6 +20,7 @@ function style(feature){
 };
 
 
+
 function createMap(){
     //create map object
     var map = L.map("map", {
@@ -26,6 +31,7 @@ function createMap(){
     });
     
     L.geoJSON(Counties, {style:style}).addTo(map);
+    
     
     //add base tile layer
     var light = L.tileLayer('https://api.tiles.mapbox.com/v4/{id}/{z}/{x}/{y}.png?access_token=pk.eyJ1IjoiZW1pbGxpZ2FuIiwiYSI6ImNqczg0NWlxZTBia2U0NG1renZyZDR5YnUifQ.UxV3OqOsN6KuZsclo96yvQ', {
@@ -45,17 +51,44 @@ function createMap(){
         accessToken: 'pk.eyJ1IjoiZW1pbGxpZ2FuIiwiYSI6ImNqczg0NWlxZTBia2U0NG1renZyZDR5YnUifQ.UxV3OqOsN6KuZsclo96yvQ'
     }).addTo(map);
     
+    getData(map);
+    
     //add basemaps
     var baseMaps = {
         "Greyscale": light,
         "Streets": streets,
     };
     
-    //layer control panel
-    L.control.layers(baseMaps, overlayMaps, {collapsed:false}).addTo(map);
-    
     return map;
 };
 
+
+
+//function to retrieve the data and place it on the map
+function getData(map){
+    //load the data from the pertussis json
+    $.ajax("data/WI_PubSchools.geojson", {
+        dataType: "json",
+        success: function(response){
+            
+            //create marker options
+            var geojsonMarkerOptions = {
+                radius: 4,
+                fillColor: "#8905B7",
+                color: "#787878",
+                weight: 1,
+                opacity: 0.8,
+                fillOpacity: 0.8
+            };
+			
+            //create leaflet geojson layer
+            L.geoJson(response, {
+                pointToLayer: function (feature, latlng){
+                    return L.circleMarker(latlng, geojsonMarkerOptions);
+                }
+            }).addTo(map);
+		}
+    });
+};
 
 $(document).ready(createMap);
