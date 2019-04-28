@@ -26,3 +26,14 @@ html, body, #map {
   padding: 10px;
   border-radius: 25px;
 }
+
+.legend-control-container {
+    width: 400px;
+    height: 350px;
+    background-color: rgba(255,255,255,0.6);
+    box-shadow: 0 0 15px rgba(0,0,0,0.2);
+    padding: 10px;
+    line-height: 45px;
+    text-align: center;
+    border: solid gray 1px;
+}
