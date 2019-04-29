@@ -18,10 +18,10 @@ function getData(map){
 function createPoints(data,map,attributes){
 	featLayer = L.geoJson(data, {
                 pointToLayer: function (feature, latlng){
-                    //return L.circleMarker(latlng, geojsonMarkerOptions);
 					return pointToLayer(feature,latlng,attributes);
                 }
-			}).addTo(map);
+			});
+	map.addLayer(featLayer);
 };
 
 
@@ -66,8 +66,12 @@ function pointToLayer(feature, latlng, attributes){
 	
 	popupContent += "<p><b>District Name:</b> " + feature.properties.DISTRICT + "</p>";
     
-    popupContent += "<p><b>Percentage of Students Meeting Minimum Vaccination Requirements:</b> At least " + feature.properties.PctMetMinRequirements_Vax + "%</p>"; 
-		
+	if (feature.properties.PctMetMinRequirements_Vax > 0) {
+		popupContent += "<p><b>Percentage of Students Meeting Minimum Vaccination Requirements:</b> At least " + feature.properties.PctMetMinRequirements_Vax + "%</p>"; 
+	} else {
+		popupContent += "<p><b>Percentage of Students Meeting Minimum Vaccination Requirements:</b> <i> No Vaccination Data Provided</i></p>";
+	};
+	
 	//bind the popup to the circle marker
     layer.bindPopup(popupContent, {
 		offset: new L.point(0, -1)
@@ -117,11 +121,8 @@ function createMap(){
     
     var counties = new L.geoJSON(Counties, {style:styleCounties}).addTo(map);
     var districts = new L.geoJSON(Districts, {style:styleDistricts}).addTo(map);
+	var schools = getData(map)
     
-    
-    getData(map);
-    
-
     //add base tile layer
     var light = L.tileLayer('https://api.tiles.mapbox.com/v4/{id}/{z}/{x}/{y}.png?access_token=pk.eyJ1IjoiZW1pbGxpZ2FuIiwiYSI6ImNqczg0NWlxZTBia2U0NG1renZyZDR5YnUifQ.UxV3OqOsN6KuZsclo96yvQ', {
         //map attribution
@@ -153,13 +154,13 @@ function createMap(){
         "Unified School Districts": districts,
         "Counties": counties,
     };
-    
-    
+	
+	
     //layer control
     L.control.layers(baseMaps, overlayMaps, {collapsed:false}).addTo(map);
     
     
-    return map;
+	return map;
 };
 
 
