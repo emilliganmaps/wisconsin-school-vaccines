@@ -6,7 +6,7 @@ $(document).click(function(){
 //function to retrieve the data and place it on the map
 function getData(map){
     //load the data from the pertussis json
-    $.ajax("data/WI_PubSchools.geojson", {
+    $.ajax("data/WI_PubSchools_VaxData.geojson", {
         dataType: "json",
         success: function(response){
 			var attributes = processData(response);
@@ -62,7 +62,9 @@ function pointToLayer(feature, latlng, attributes){
 	//build popup content string starting with city...Example 2.1 line 24
 	var popupContent = "<p><b>School Name:</b> " + feature.properties.SCHOOL + "</p>";
 	
-	popupContent += "<p><b>District Name:</b> " + feature.properties.DISTRICT + "</p>"; 
+	popupContent += "<p><b>District Name:</b> " + feature.properties.DISTRICT + "</p>";
+    
+    popupContent += "<p><b>Percentage of Students Meeting Minimum Vaccination Requirements:</b> At least " + feature.properties.PctMetMinRequirements_Vax + "%</p>"; 
 		
 	//bind the popup to the circle marker
     layer.bindPopup(popupContent, {
