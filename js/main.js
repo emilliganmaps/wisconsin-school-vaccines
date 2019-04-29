@@ -24,6 +24,7 @@ function createPoints(data,map,attributes){
 			}).addTo(map);
 };
 
+
 function processData(data){
     //empty array to hold attributes
     var attributes = [];
@@ -41,6 +42,7 @@ function processData(data){
 
     return attributes;
 };
+
 
 //create function to make the proportional symbols of a certain color, fill, opacity, etc
 function pointToLayer(feature, latlng, attributes){
@@ -74,34 +76,34 @@ function pointToLayer(feature, latlng, attributes){
 	return layer		
 };
 
+
 var counties = L.layerGroup(Counties);
 var districts = L.layerGroup(Districts);
-
 
 
 //style counties layer
 function styleCounties(feature){
     return {
-        fillColor: "grey",
+        fillColor: "#94F921",
         opacity: 0.5,
         weight: 0.5,
         color: "black",
         fillOpacity: 0.4
     };
 };
-
 
 
 //style districts layer
 function styleDistricts(feature){
     return {
-        fillColor: "grey",
+        fillColor: "#21F2F9",
         opacity: 0.5,
         weight: 0.5,
         color: "black",
         fillOpacity: 0.4
     };
 };
+
 
 function createMap(){
     //create map object
@@ -145,14 +147,17 @@ function createMap(){
         "Streets": streets,
     };
     
+    
     //add new data layer
     var overlayMaps = {
         "Unified School Districts": districts,
         "Counties": counties,
     };
     
+    
     //layer control
     L.control.layers(baseMaps, overlayMaps, {collapsed:false}).addTo(map);
+    
     
     return map;
 };

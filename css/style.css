@@ -32,7 +32,7 @@ html, body, #map {
   font-family: 'Open Sans', sans-serif;
   font-size: 14px;
   color: black;
-  background-color: rgba(198,198,198,255);
+  background-color: rgba(239, 239, 239, 1);
   box-shadow: 0 1px 5px black;
   padding: 10px;
   border-radius: 25px;
@@ -47,4 +47,17 @@ html, body, #map {
     line-height: 45px;
     text-align: center;
     border: solid gray 1px;
+}
+
+#range {
+    bottom: 0px; 
+    right: 1px; 
+    margin: 10px 25px;
+}
+
+.noUi-tooltip {
+    display: none;
+}
+.noUi-active .noUi-tooltip {
+    display: block;
 }
