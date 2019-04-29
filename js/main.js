@@ -3,35 +3,74 @@ $(document).click(function(){
 });
 
 
-
 //function to retrieve the data and place it on the map
 function getData(map){
     //load the data from the pertussis json
     $.ajax("data/WI_PubSchools.geojson", {
         dataType: "json",
         success: function(response){
-            
-            //create marker options
-            var geojsonMarkerOptions = {
-                radius: 4,
-                fillColor: "#8905B7",
-                color: "#787878",
-                weight: 1,
-                opacity: 0.8,
-                fillOpacity: 0.8
-            };
-			
-            //create leaflet geojson layer
-            L.geoJson(response, {
-                pointToLayer: function (feature, latlng){
-                    return L.circleMarker(latlng, geojsonMarkerOptions);
-                }
-            }).addTo(map);
+			var attributes = processData(response);
+			createPoints(response, map, attributes);
 		}
     });
 };
 
+function createPoints(data,map,attributes){
+	featLayer = L.geoJson(data, {
+                pointToLayer: function (feature, latlng){
+                    //return L.circleMarker(latlng, geojsonMarkerOptions);
+					return pointToLayer(feature,latlng,attributes);
+                }
+			}).addTo(map);
+};
 
+function processData(data){
+    //empty array to hold attributes
+    var attributes = [];
+
+    //properties of the first feature in the dataset
+    var properties = data.features[0].properties;
+
+    //push each attribute name into attributes array
+    for (var attribute in properties){
+        //only take attributes with population values
+        if (attribute.indexOf("2") > -1){
+            attributes.push(attribute);
+        };
+    };
+
+    return attributes;
+};
+
+//create function to make the proportional symbols of a certain color, fill, opacity, etc
+function pointToLayer(feature, latlng, attributes){
+	
+	var attribute = attributes[0];
+	
+	//create marker options
+	var geojsonMarkerOptions = {
+		radius: 4,
+		fillColor: "#4D59F7",
+		color: "#EFEFEF",
+		weight: 1,
+		opacity: 0.8,
+		fillOpacity: 0.8
+	};
+	
+	var layer = L.circleMarker(latlng, geojsonMarkerOptions);
+	
+	//build popup content string starting with city...Example 2.1 line 24
+	var popupContent = "<p><b>School Name:</b> " + feature.properties.SCHOOL + "</p>";
+	
+	popupContent += "<p><b>District Name:</b> " + feature.properties.DISTRICT + "</p>"; 
+		
+	//bind the popup to the circle marker
+    layer.bindPopup(popupContent, {
+		offset: new L.point(0, -1)
+	});
+	
+	return layer		
+};
 
 var counties = L.layerGroup(Counties);
 var districts = L.layerGroup(Districts);
@@ -62,12 +101,10 @@ function styleDistricts(feature){
     };
 };
 
-
-
 function createMap(){
     //create map object
     var map = L.map("map", {
-        center: [44.7844, -89.7879],
+        center: [44.7844, -88.7879],
         zoom: 7,
         minZoom: 3,
         maxZoom: 12
@@ -114,12 +151,9 @@ function createMap(){
     
     //layer control
     L.control.layers(baseMaps, overlayMaps, {collapsed:false}).addTo(map);
-
     
     return map;
 };
-
-
 
 
 $(document).ready(createMap);
