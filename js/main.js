@@ -67,7 +67,7 @@ function styleDistricts(feature){
 function createMap(){
     //create map object
     var map = L.map("map", {
-        center: [44.7844, -88.7879],
+        center: [44.7844, -89.7879],
         zoom: 7,
         minZoom: 3,
         maxZoom: 12
@@ -114,6 +114,7 @@ function createMap(){
     
     //layer control
     L.control.layers(baseMaps, overlayMaps, {collapsed:false}).addTo(map);
+
     
     return map;
 };
