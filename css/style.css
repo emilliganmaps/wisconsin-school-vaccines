@@ -38,26 +38,18 @@ html, body, #map {
   border-radius: 25px;
 }
 
-.legend-control-container {
-    width: 400px;
-    height: 350px;
-    background-color: rgba(255,255,255,0.6);
-    box-shadow: 0 0 15px rgba(0,0,0,0.2);
-    padding: 10px;
-    line-height: 45px;
-    text-align: center;
-    border: solid gray 1px;
-}
-
-#range {
-    bottom: 0px; 
-    right: 1px; 
-    margin: 10px 25px;
-}
-
-.noUi-tooltip {
-    display: none;
-}
-.noUi-active .noUi-tooltip {
-    display: block;
+.footer {
+  position: fixed;
+  height: 50px;
+  width: 475px;
+  font-size: 9px;
+  color: black;
+  z-index: 10;
+  left: 20px;
+  bottom: 0px;
+  background-color: rgba(255,255,255,0.5);
+  border-radius: 5px;
+  margin: 0;
+  padding: 0;
+  font-family: 'Open Sans', sans-serif;
 }

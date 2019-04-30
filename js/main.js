@@ -67,9 +67,11 @@ function pointToLayer(feature, latlng, attributes){
 	popupContent += "<p><b>District Name:</b> " + feature.properties.DISTRICT + "</p>";
     
 	if (feature.properties.PctMetMinRequirements_Vax > 0) {
-		popupContent += "<p><b>Percentage of Students Meeting Minimum Vaccination Requirements:</b> At least " + feature.properties.PctMetMinRequirements_Vax + "%</p>"; 
-	} else {
-		popupContent += "<p><b>Percentage of Students Meeting Minimum Vaccination Requirements:</b> <i> No Vaccination Data Provided</i></p>";
+		popupContent += "<p><b>Percentage of students meeting minimum vaccination requirements:</b> At least " + feature.properties.PctMetMinRequirements_Vax + "%</p>"; 
+	}
+    
+    else {
+		popupContent += "<p><b>Percentage of students meeting minimum vaccination requirements:</b> <i> No data available</i></p>";
 	};
 	
 	//bind the popup to the circle marker
@@ -112,7 +114,7 @@ function styleDistricts(feature){
 function createMap(){
     //create map object
     var map = L.map("map", {
-        center: [44.7844, -88.7879],
+        center: [44.7844, -89.7879],
         zoom: 7,
         minZoom: 3,
         maxZoom: 12
@@ -152,12 +154,25 @@ function createMap(){
     //add new data layer
     var overlayMaps = {
         "Unified School Districts": districts,
-        "Counties": counties,
+        "Counties": counties
     };
 	
 	
     //layer control
     L.control.layers(baseMaps, overlayMaps, {collapsed:false}).addTo(map);
+    
+    
+    var searchLayer = new L.Control.Search({
+        position: 'topright',
+        layer: schools,
+        initial: false,
+        zoom: 3,
+        marker: false,
+        textPlaceholder: 'search...',
+        collapsed: false
+    });
+    
+    map.addControl(searchLayer);
     
     
 	return map;
