@@ -1,7 +1,7 @@
 $(document).click(function(){
     $("#welcomeWrapper").hide();
 });
-
+var schools;
 
 //function to retrieve the data and place it on the map
 function getData(map){
@@ -11,17 +11,18 @@ function getData(map){
         success: function(response){
 			var attributes = processData(response);
 			createPoints(response, map, attributes);
+			otherLayers(response, map, attributes);
 		}
     });
 };
 
 function createPoints(data,map,attributes){
-	featLayer = L.geoJson(data, {
+	schools = L.geoJson(data, {
                 pointToLayer: function (feature, latlng){
 					return pointToLayer(feature,latlng,attributes);
                 }
 			});
-	map.addLayer(featLayer);
+	map.addLayer(schools);
 };
 
 
@@ -65,8 +66,6 @@ function pointToLayer(feature, latlng, attributes){
 	var popupContent = "<p><b>School Name:</b> " + feature.properties.SCHOOL + "</p>";
 	
 	popupContent += "<p><b>District Name:</b> " + feature.properties.DISTRICT + "</p>";
-    
-    popupContent += "<p><b>County: </b> " + feature.properties.PHYS_COUNT + "</p>";
     
 	if (feature.properties.PctMetMinRequirements_Vax > 0) {
 		popupContent += "<p><b>Percentage of students meeting minimum vaccination requirements:</b> At least " + feature.properties.PctMetMinRequirements_Vax + "%</p>"; 
@@ -113,17 +112,6 @@ function styleDistricts(feature){
 };
 
 
-function init(){
-    Tabletop.init({key: 'https://docs.google.com/spreadsheets/d/1blEtxhFueABSa3tWZF6PJH3hG9AJUKtty-hjSN6r0OE/edit?usp=sharing',
-                  callback: function(data, tabletop) {
-                      //console.log(data)
-                  },
-                  simpleSheet: true})
-};
-
-window.addEventListener('DOMContentLoaded', init);
-
-
 function createMap(){
     //create map object
     var map = L.map("map", {
@@ -132,12 +120,12 @@ function createMap(){
         minZoom: 3,
         maxZoom: 12
     });
-    
-    
-    var counties = new L.geoJSON(Counties, {style:styleCounties}).addTo(map);
-    var districts = new L.geoJSON(Districts, {style:styleDistricts}).addTo(map);
-	var schools = getData(map)
-    
+	
+	getData(map);
+};
+
+
+function otherLayers(response, map, attributes){ 
     //add base tile layer
     var light = L.tileLayer('https://api.tiles.mapbox.com/v4/{id}/{z}/{x}/{y}.png?access_token=pk.eyJ1IjoiZW1pbGxpZ2FuIiwiYSI6ImNqczg0NWlxZTBia2U0NG1renZyZDR5YnUifQ.UxV3OqOsN6KuZsclo96yvQ', {
         //map attribution
@@ -157,6 +145,10 @@ function createMap(){
     }).addTo(map);
     
     
+    var counties = new L.geoJSON(Counties, {style:styleCounties}).addTo(map);
+    var districts = new L.geoJSON(Districts, {style:styleDistricts}).addTo(map);
+    
+    
     //add basemaps
     var baseMaps = {
         "Greyscale": light,
@@ -174,67 +166,32 @@ function createMap(){
     //layer control
     L.control.layers(baseMaps, overlayMaps, {collapsed:false}).addTo(map);
     
+	console.log(schools);
     
-    var markersLayer = new L.LayerGroup();
-    map.addLayer(markersLayer);
-    
-    var searchLayer = new L.Control.Search({
+    var searchControl = new L.Control.Search({
         position: 'topright',
-        layer: markersLayer,
-        initial: false,
-        zoom: 3,
-        marker: false,
-        textPlaceholder: 'Search for your school',
-        collapsed: false
+        layer: schools,
+		propertyName: 'SCHOOL', 
+        circleLocation: true,
+        textPlaceholder: 'Search School Name',
+        collapsed: false,
+		moveToLocation: function(latlng, title, map) {
+			console.log(latlng);
+			//map.fitBounds( latlng.layer.getBounds() );
+			//var zoom = map.getBoundsZoom(latlng.layer.getBounds());
+			zoom = 10;
+  			map.setView(latlng, zoom); // access the zoom
+		}
     });
     
-    map.addControl(searchLayer);
+	searchControl.on('search:locationfound', function(e) {
 
-    
-   var code = "1blEtxhFueABSa3tWZF6PJH3hG9AJUKtty-hjSN6r0OE"
-        Tabletop.init({ 
-        key: code,
-        callback: function(sheet, tabletop){ 
-
-          for (var i in sheet){
-            var data = sheet[i];
-
-              var icon = L.icon({
-                  iconUrl: data.icon,
-                  iconSize:     [52, 60], // size of the icon
-                  iconAnchor:   [26, 60], // point of the icon which will correspond to marker's location
-                  popupAnchor: [0, -60]
-              });
-              if (data.iconori === "left") {
-                icon = L.icon({
-                  iconUrl: data.icon,
-                  iconSize:     [60, 52], 
-                  iconAnchor:   [60, 26], 
-                  popupAnchor: [-35, -26]
-                  });
-              };
-              if (data.iconori === "right") {
-                icon = L.icon({
-                  iconUrl: data.icon,
-                  iconSize:     [60, 52], 
-                  iconAnchor:   [0, 26], 
-                  popupAnchor: [35, -26]
-                  })
-                };
-          }
-        },
-        simpleSheet: true 
-    });
-    
-    
-    var title = data.SCHOOL,  //value searched
-    loc = [data.Longitude, data.Latitude]    //position found
-
-    marker = new L.Marker(new L.latLng(loc), {title: title, icon:icon} );//se property searched
-    marker.bindPopup("<strong style='color: #84b819'>" + title + "</strong><br>" + 
-                          data.DISTRICT + " | " + data.PHYS_COUNTY + "<br>Percent meeting minimum vaccination requirements: " + data.PctMetMinRequirements_Vax);
-
-    markersLayer.addLayer(marker);
+	e.layer.setStyle({fillColor: '#3f0', color: '#0f0'});
+	if(e.layer._popup)
+		e.layer.openPopup();
+	});
+	
+    map.addControl(searchControl);
     
     
 	return map;
