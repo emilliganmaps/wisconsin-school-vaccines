@@ -1,6 +1,7 @@
 $(document).click(function(){
     $("#welcomeWrapper").hide();
 });
+
 var schools;
 
 //function to retrieve the data and place it on the map
@@ -10,8 +11,8 @@ function getData(map){
         dataType: "json",
         success: function(response){
 			var attributes = processData(response);
-			createPoints(response, map, attributes);
-			otherLayers(response, map, attributes);
+            createPoints(response, map, attributes);
+            otherLayers(response, map, attributes);
 		}
     });
 };
@@ -23,7 +24,8 @@ function createPoints(data,map,attributes){
                 }
 			});
 	map.addLayer(schools);
-};
+    schools.setZIndex(600);
+    };
 
 
 function processData(data){
@@ -57,7 +59,8 @@ function pointToLayer(feature, latlng, attributes){
 		color: "#EFEFEF",
 		weight: 1,
 		opacity: 0.8,
-		fillOpacity: 0.8
+		fillOpacity: 0.8,
+        zIndex: 600
 	};
 	
 	var layer = L.circleMarker(latlng, geojsonMarkerOptions);
@@ -85,7 +88,9 @@ function pointToLayer(feature, latlng, attributes){
 
 
 var counties = L.layerGroup(Counties);
+counties.setZIndex(300);
 var districts = L.layerGroup(Districts);
+districts.setZIndex(300);
 
 
 //style counties layer
@@ -95,7 +100,8 @@ function styleCounties(feature){
         opacity: 0.5,
         weight: 0.5,
         color: "black",
-        fillOpacity: 0.4
+        fillOpacity: 0.4,
+        zIndex: 400
     };
 };
 
@@ -107,7 +113,8 @@ function styleDistricts(feature){
         opacity: 0.5,
         weight: 0.5,
         color: "black",
-        fillOpacity: 0.4
+        fillOpacity: 0.4,
+        zIndex: 400
     };
 };
 
@@ -120,7 +127,7 @@ function createMap(){
         minZoom: 3,
         maxZoom: 12
     });
-	
+    
 	getData(map);
 };
 
@@ -161,19 +168,25 @@ function otherLayers(response, map, attributes){
         "Unified School Districts": districts,
         "Counties": counties
     };
-	
+    
 	
     //layer control
     L.control.layers(baseMaps, overlayMaps, {collapsed:false}).addTo(map);
+    schools.bringToFront();
     
-	console.log(schools);
+    map.on("overlayadd", function (event) {
+    schools.bringToFront();
+    });
     
+	//console.log(schools);
+    
+    //search for a school
     var searchControl = new L.Control.Search({
-        position: 'topright',
+        position: 'topright', //position on page
         layer: schools,
-		propertyName: 'SCHOOL', 
+		propertyName: 'SCHOOL', //school column
         circleLocation: true,
-        textPlaceholder: 'Search School Name',
+        textPlaceholder: 'Search School Name', //search by name of school
         collapsed: false,
 		moveToLocation: function(latlng, title, map) {
 			console.log(latlng);
@@ -186,11 +199,13 @@ function otherLayers(response, map, attributes){
     
 	searchControl.on('search:locationfound', function(e) {
 
+    //style the search result
 	e.layer.setStyle({fillColor: '#3f0', color: '#0f0'});
 	if(e.layer._popup)
 		e.layer.openPopup();
 	});
 	
+    //initialize search control
     map.addControl(searchControl);
     
     
