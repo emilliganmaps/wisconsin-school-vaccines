@@ -216,39 +216,40 @@ function otherLayers(response, map, attributes){
     var range = document.getElementById('range');
 
     noUiSlider.create(range, {
-        range: {
-            'min': 100,
-            'max': 0
+        start: [ 50, 80 ], // Handle start position
+        step: 5, // Slider moves in increments of '10'
+        margin: 20, // Handles must be more than '10' apart
+        connect: true, // Display a colored bar between the handles
+        direction: 'rtl', // Put '0' at the bottom of the slider
+        orientation: 'vertical', // Orient the slider vertically
+        behaviour: 'tap-drag', // Move handle on tap, bar is draggable
+        range: { // Slider can select '0' to '100'
+            'min': 0,
+            'max': 100
         },
-
-        step: 5,
-
-        // Handles start at ...
-        start: [50, 80],
-
-        // ... must be at least 300 apart
-        margin: 10,
-
-        // ... but no more than 600
-        limit: 50,
-
-        // Display colored bars between handles
-        connect: true,
-
-        // Put '0' at the bottom of the slider
-        direction: 'rtl',
-        orientation: 'horizontal',
-
-        // Move handle on tap, bars are draggable
-        behaviour: 'tap-drag',
         tooltips: true,
+        format: wNumb({
+                decimals: 0,
+                suffix: '%'
+        })
+    });
 
-        // Show a scale with the slider
-        pips: {
-            mode: 'steps',
-            stepped: true,
-            density: 4
+    var valueInput = document.getElementById('value-input'),
+            valueSpan = document.getElementById('value-span');
+
+    // When the slider value changes, update the input and span
+    range.noUiSlider.on('update', function( values, handle ) {
+        if ( handle ) {
+            valueInput.value = values[handle];
+        } else {
+            valueSpan.innerHTML = values[handle];
         }
+    });
+
+    // When the input changes, set the slider value
+    valueInput.addEventListener('change', function(){
+        range.noUiSlider.set([null, this.value]);
+        
     });
     
     

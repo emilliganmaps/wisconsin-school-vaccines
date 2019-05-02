@@ -51,3 +51,32 @@ body {
   padding: 0;
   font-family: 'Open Sans', sans-serif;
 }
+
+.noUi-tooltip {
+    display: none;
+}
+.noUi-active .noUi-tooltip {
+    display: block;
+}
+    
+#showcase{
+    margin: 0 20px;
+    text-align: center;
+}
+    
+#range {
+    height: 300px;
+    margin: 0 auto 30px;
+    position: left;
+    z-index: 600;
+    font-family: 'Open Sans', sans-serif;
+    font-size: 12px;
+}
+
+#value-span, #value-input {
+    width: 50%;
+    float: left;
+    display: block;
+    text-align: center;
+    margin: 0;
+}
