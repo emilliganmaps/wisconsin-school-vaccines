@@ -209,6 +209,45 @@ function otherLayers(response, map, attributes){
     map.addControl(searchControl);
     
     
+    var range = document.getElementById('range');
+
+    noUiSlider.create(range, {
+        range: {
+            'min': 100,
+            'max': 0
+        },
+
+        step: 5,
+
+        // Handles start at ...
+        start: [50, 80],
+
+        // ... must be at least 300 apart
+        margin: 10,
+
+        // ... but no more than 600
+        limit: 50,
+
+        // Display colored bars between handles
+        connect: true,
+
+        // Put '0' at the bottom of the slider
+        direction: 'rtl',
+        orientation: 'horizontal',
+
+        // Move handle on tap, bars are draggable
+        behaviour: 'tap-drag',
+        tooltips: true,
+
+        // Show a scale with the slider
+        pips: {
+            mode: 'steps',
+            stepped: true,
+            density: 4
+        }
+    });
+    
+    
 	return map;
 };
 

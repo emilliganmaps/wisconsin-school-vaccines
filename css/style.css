@@ -5,6 +5,11 @@ html, body, #map {
   z-index: 'auto';
 }
 
+body {
+    padding: 0;
+    margin: 0;
+}
+
 .click {
   color: black;
   font-size: 16px;
