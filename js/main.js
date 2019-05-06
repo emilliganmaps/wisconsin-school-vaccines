@@ -214,14 +214,14 @@ function otherLayers(response, map, attributes){
 
     noUiSlider.create(range, {
         start: [ 50, 80 ], // Handle start position
-        step: 5, // Slider moves in increments of '10'
-        margin: 20, // Handles must be more than '10' apart
+        step: 10, // Slider moves in increments of '10'
+        margin: 10, // Handles must be more than '10' apart
         connect: true, // Display a colored bar between the handles
         direction: 'rtl', // Put '0' at the bottom of the slider
         orientation: 'vertical', // Orient the slider vertically
         behaviour: 'tap-drag', // Move handle on tap, bar is draggable
         range: { // Slider can select '0' to '100'
-            'min': 0,
+            'min': 30,
             'max': 100
         },
         tooltips: true,
