@@ -17,15 +17,16 @@ body {
 
 .leaflet-popup-content p {
     margin: 0.2em 0;
+    z-index: 600;
 }
 
 #welcomeWrapper {
   text-align: center;
   position: fixed;
-  top: 50%;
+  top: 60%;
   left: 50%;
   transform: translate(-50%,-100%);
-  width: 40%;
+  width: 45%;
   z-index: 700;
   font-family: 'Open Sans', sans-serif;
   font-size: 14px;
@@ -68,9 +69,12 @@ body {
     height: 300px;
     margin: 0 auto 30px;
     position: left;
-    z-index: 600;
+    z-index: 500;
     font-family: 'Open Sans', sans-serif;
     font-size: 12px;
+    position: fixed;
+    top: 30%;
+    right: 5%;
 }
 
 #value-span, #value-input {

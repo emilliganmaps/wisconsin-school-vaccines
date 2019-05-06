@@ -20,12 +20,11 @@ function getData(map){
 function createPoints(data,map,attributes){
 	schools = L.geoJson(data, {
                 pointToLayer: function (feature, latlng){
-					return pointToLayer(feature,latlng,attributes);
+					return pointToLayer(feature, latlng, attributes);
                 }
 			});
 	map.addLayer(schools);
-    schools.setZIndex(600);
-    };
+};
 
 
 function processData(data){
@@ -88,9 +87,7 @@ function pointToLayer(feature, latlng, attributes){
 
 
 var counties = L.layerGroup(Counties);
-counties.setZIndex(300);
 var districts = L.layerGroup(Districts);
-districts.setZIndex(300);
 
 
 //style counties layer
@@ -230,7 +227,7 @@ function otherLayers(response, map, attributes){
         tooltips: true,
         format: wNumb({
                 decimals: 0,
-                suffix: '%'
+                suffix: '% vaccinated'
         })
     });
 
