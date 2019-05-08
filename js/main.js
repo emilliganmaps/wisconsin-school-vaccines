@@ -280,6 +280,8 @@ function otherLayers(response, map, attributes){
     
     
 	return map;
+        
+    });
 };
 
 
