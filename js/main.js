@@ -10,17 +10,40 @@ function getData(map){
     $.ajax("data/WI_PubSchools_VaxData.geojson", {
         dataType: "json",
         success: function(response){
+            
+            //console.log(response)
+            
 			var attributes = processData(response);
+            
+            //console.log(attributes)
+            
             createPoints(response, map, attributes);
             otherLayers(response, map, attributes);
+            
+        
 		}
     });
 };
 
 function createPoints(data,map,attributes){
-	schools = L.geoJson(data, {
+
+    //console.log($("#range").min);
+    
+    schools = L.geoJson(data, {
                 pointToLayer: function (feature, latlng){
-					return pointToLayer(feature, latlng, attributes);
+                    
+                //console.log(feature.properties.PctMetMinRequirements_Vax)
+                    
+                    if (feature.properties.PctMetMinRequirements_Vax>30){
+                            return pointToLayer(feature, latlng, attributes);
+
+                    }
+                        
+                    else {
+                        return
+
+                    }
+
                 }
 			});
 	map.addLayer(schools);
@@ -31,6 +54,8 @@ function processData(data){
     //empty array to hold attributes
     var attributes = [];
 
+    //console.log(data.features.properties)
+    
     //properties of the first feature in the dataset
     var properties = data.features[0].properties;
 
@@ -39,9 +64,13 @@ function processData(data){
         //only take attributes with population values
         if (attribute.indexOf("2") > -1){
             attributes.push(attribute);
+            
+
         };
     };
 
+    //console.log(attributes)
+    
     return attributes;
 };
 
@@ -62,6 +91,7 @@ function pointToLayer(feature, latlng, attributes){
         zIndex: 600
 	};
 	
+    
 	var layer = L.circleMarker(latlng, geojsonMarkerOptions);
 	
 	//build popup content string starting with city...Example 2.1 line 24
@@ -82,7 +112,7 @@ function pointToLayer(feature, latlng, attributes){
 		offset: new L.point(0, -1)
 	});
 	
-	return layer		
+	return layer	
 };
 
 
@@ -214,7 +244,7 @@ function otherLayers(response, map, attributes){
 
     noUiSlider.create(range, {
         start: [ 50, 80 ], // Handle start position
-        step: 10, // Slider moves in increments of '10'
+        step: 5, // Slider moves in increments of '10'
         margin: 10, // Handles must be more than '10' apart
         connect: true, // Display a colored bar between the handles
         direction: 'rtl', // Put '0' at the bottom of the slider
@@ -246,8 +276,7 @@ function otherLayers(response, map, attributes){
     // When the input changes, set the slider value
     valueInput.addEventListener('change', function(){
         range.noUiSlider.set([null, this.value]);
-        
-    });
+        //call filter points
     
     
 	return map;
