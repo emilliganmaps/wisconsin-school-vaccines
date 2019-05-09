@@ -1,21 +1,8 @@
-//click off of welcome wrapper to enter map
 $(document).click(function(){
     $("#welcomeWrapper").hide();
 });
 
-//style schools
 var schools;
-
-//style school markers
-var schoolsMarker = {
-    radius: 4,
-    fillColor: "#4D59F7",
-    color: "#EFEFEF",
-    weight: 1,
-    opacity: 0.8,
-    fillOpacity: 0.8,
-    zIndex: 600
-};
 
 //function to retrieve the data and place it on the map
 function getData(map){
@@ -23,32 +10,70 @@ function getData(map){
     $.ajax("data/WI_PubSchools_VaxData.geojson", {
         dataType: "json",
         success: function(response){
-            createPoints(response, map);
-            otherLayers(response, map);
+			var attributes = processData(response);
+            createPoints(response, map, attributes);
+            otherLayers(response, map, attributes);
 		}
     });
 };
 
-function createPoints(data,map){
+function createPoints(data,map,attributes){
 	schools = L.geoJson(data, {
                 pointToLayer: function (feature, latlng){
-					return pointToLayer(feature, latlng);
+					return pointToLayer(feature, latlng, attributes);
                 }
 			});
 	map.addLayer(schools);
 };
 
+
+function processData(data){
+    //empty array to hold attributes
+    var attributes = [];
+
+    //properties of the first feature in the dataset
+    var properties = data.features[0].properties;
+
+    //push each attribute name into attributes array
+    for (var attribute in properties){
+        //only take attributes with population values
+        if (attribute.indexOf("2") > -1){
+            attributes.push(attribute);
+        };
+    };
+
+    return attributes;
+};
+
+
 //create function to make the proportional symbols of a certain color, fill, opacity, etc
-function pointToLayer(feature, latlng){	
+function pointToLayer(feature, latlng, attributes){
+	
+	var attribute = attributes[0];
+	
+	//create marker options
+	var schoolsMarker = {
+		radius: 4,
+		fillColor: "#4D59F7",
+		color: "#EFEFEF",
+		weight: 1,
+		opacity: 0.8,
+		fillOpacity: 0.8,
+        zIndex: 600
+	};
+	
 	var layer = L.circleMarker(latlng, schoolsMarker);
 	
-	//build popup content string
+	//build popup content string starting with city...Example 2.1 line 24
 	var popupContent = "<p><b>School Name:</b> " + feature.properties.SCHOOL + "</p>";
+	
 	popupContent += "<p><b>District Name:</b> " + feature.properties.DISTRICT + "</p>";
     
 	if (feature.properties.PctMetMinRequirements_Vax > 0) {
 		popupContent += "<p><b>Percentage of students meeting minimum vaccination requirements:</b> At least " + feature.properties.PctMetMinRequirements_Vax + "%</p>"; 
-	} else {
+	}
+    
+    else {
 		popupContent += "<p><b>Percentage of students meeting minimum vaccination requirements:</b> <i> No data available</i></p>";
 	};
 	
@@ -57,12 +82,13 @@ function pointToLayer(feature, latlng){
 		offset: new L.point(0, -1)
 	});
 	
-	return layer;		
+	return layer		
 };
 
 
 var counties = L.layerGroup(Counties);
 var districts = L.layerGroup(Districts);
+
 
 //style counties layer
 function styleCounties(feature){
@@ -76,6 +102,7 @@ function styleCounties(feature){
     };
 };
 
+
 //style districts layer
 function styleDistricts(feature){
     return {
@@ -87,6 +114,7 @@ function styleDistricts(feature){
         zIndex: 400
     };
 };
+
 
 function createMap(){
     //create map object
@@ -101,14 +129,14 @@ function createMap(){
 };
 
 
-function otherLayers(response, map){ 
+function otherLayers(response, map, attributes){ 
     //add base tile layer
     var light = L.tileLayer('https://api.tiles.mapbox.com/v4/{id}/{z}/{x}/{y}.png?access_token=pk.eyJ1IjoiZW1pbGxpZ2FuIiwiYSI6ImNqczg0NWlxZTBia2U0NG1renZyZDR5YnUifQ.UxV3OqOsN6KuZsclo96yvQ', {
         //map attribution
         attribution: 'Map data &copy; <a href="http://openstreetmap.org">OpenStreetMap</a> contributors, <a href="http://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>, Imagery &copy; <a href="http://mapbox.com">Mapbox</a>',
         //zoom
         maxZoom: 18,
-        // mapbox light
+        //mapbox light
         id: 'mapbox.light',
         //my unique access token
         accessToken: 'pk.eyJ1IjoiZW1pbGxpZ2FuIiwiYSI6ImNqczg0NWlxZTBia2U0NG1renZyZDR5YnUifQ.UxV3OqOsN6KuZsclo96yvQ'
@@ -118,47 +146,53 @@ function otherLayers(response, map){
         attribution: 'Map data &copy; <a href="http://openstreetmap.org">OpenStreetMap</a> contributors, <a href="http://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>, Imagery &copy; <a href="http://mapbox.com">Mapbox</a>',
         //zoom
         maxZoom: 18,
-        // mapbox streets
+        //mapbox streets
         id: 'mapbox.streets',
         //my unique access token
         accessToken: 'pk.eyJ1IjoiZW1pbGxpZ2FuIiwiYSI6ImNqczg0NWlxZTBia2U0NG1renZyZDR5YnUifQ.UxV3OqOsN6KuZsclo96yvQ'
     }).addTo(map);
     
+    
     var counties = new L.geoJSON(Counties, {style:styleCounties}).addTo(map);
     var districts = new L.geoJSON(Districts, {style:styleDistricts}).addTo(map);
+    
     
     //add basemaps
     var baseMaps = {
         "Greyscale": light,
         "Streets": streets,
     };
+    
+    
     //add new data layer
     var overlayMaps = {
         "Unified School Districts": districts,
         "Counties": counties
     };
+    
+	
     //layer control
     L.control.layers(baseMaps, overlayMaps, {collapsed:false}).addTo(map);
-    //bring schools layer to front right away
     schools.bringToFront();
     
-    //bring schools layer to the front every time overlay is changed
     map.on("overlayadd", function (event) {
-        schools.bringToFront();
+    schools.bringToFront();
     });
-        
+    
+	//console.log(schools);
+    
     //search for a school
     var searchControl = new L.Control.Search({
         position: 'topright', //position on page
         layer: schools,
 		propertyName: 'SCHOOL', //school column
+        circleLocation: true,
         textPlaceholder: 'Search School Name', //search by name of school
-        marker: {
-            icon: false
-        },
         collapsed: false,
 		moveToLocation: function(latlng, title, map) {
-			//console.log(latlng);
+			console.log(latlng);
+			//map.fitBounds( latlng.layer.getBounds() );
+			//var zoom = map.getBoundsZoom(latlng.layer.getBounds());
 			zoom = 10;
   			map.setView(latlng, zoom); // access the zoom
 		}
@@ -166,10 +200,9 @@ function otherLayers(response, map){
     
 	searchControl.on('search:locationfound', function(e) {
 
-    //style the search icon result
-	e.layer.setStyle({fillColor: '#ffff00', color: '#ffff00', fillOpacity: 1});
+    //style the search result
+	e.layer.setStyle({fillColor: '#3f0', color: '#0f0'});
 	if(e.layer._popup)
-        //open the popup for the selected school
 		e.layer.openPopup();
 	});
 	
@@ -177,11 +210,8 @@ function otherLayers(response, map){
     map.addControl(searchControl);
     
     
-    
-    //slider function
     var range = document.getElementById('range');
 
-    //set up slider
     noUiSlider.create(range, {
         start: [ 50, 80 ], // Handle start position
         step: 5, // Slider moves in increments of '10'
@@ -194,7 +224,6 @@ function otherLayers(response, map){
             'min': 30,
             'max': 100
         },
-        //style the filter slider tooltips
         tooltips: true,
         format: wNumb({
                 decimals: 0,
@@ -202,67 +231,50 @@ function otherLayers(response, map){
         })
     });
     
-    //sets min and max input values
     document.getElementById('input-number-min').setAttribute("value", 30);
     document.getElementById('input-number-max').setAttribute("value", 100);
 
     var inputNumberMin = document.getElementById('input-number-min'),
         inputNumberMax = document.getElementById('input-number-max');
     
-    //when the input changes, set the slider value
+    // When the input changes, set the slider value
     inputNumberMin.addEventListener('change', function(){
         range.noUiSlider.set([this.value, null]);
     });
     
-    //when the input changes, set the slider value
+    // When the input changes, set the slider value
     inputNumberMax.addEventListener('change', function(){
         range.noUiSlider.set([null, this.value]);
     });
-
-    //define what values are being called by the slider
+    
     range.noUiSlider.on('update', function( values, handle ) {
+
         if (handle==0){
-            document.getElementById('input-number-min').setAttribute("value", values[0].split("%")[0]);
+            document.getElementById('input-number-min').getAttribute(value) = values[0];
         } else {
-            document.getElementById('input-number-max').setAttribute("value", values[1].split("%")[0]);
+            document.getElementById('input-number-max').getAttribute(value) =  values[1];
         }
         
-        rangeMin = Number(document.getElementById('input-number-min').getAttribute("value"));
-        rangeMax = Number(document.getElementById('input-number-max').getAttribute("value"));
+        rangeMin = document.getElementById('input-number-min').value;
+        rangeMax = document.getElementById('input-number-max').value;
         
+        //clear the layer:
+        schools.removeLayer(schools);
         
-        schools.setStyle(function(feature){ 
-            return styleFilter(feature); 
-        });
-        
-        //remove interactivity from hidden points so they can't be clicked on
-        schools.eachLayer(function(layer){
-            if(!((+layer.feature.properties.PctMetMinRequirements_Vax <= rangeMax) && (+layer.feature.properties.PctMetMinRequirements_Vax >= rangeMin))){
-                //remove class='leaflet-interactive' from hidden points
-                L.DomUtil.removeClass(layer._path, 'leaflet-interactive');
-            }else{
-                //retain interactivity for visible points
-                L.DomUtil.addClass(layer._path, 'leaflet-interactive');
-            }
-        });
-
-        //make points that are not within the filter range invisible
-        function styleFilter(feature){
-            if(!((+feature.properties.PctMetMinRequirements_Vax <= rangeMax) && (+feature.properties.PctMetMinRequirements_Vax >= rangeMin))){
-                //invisible point styling
-                var styleHidden = {
-                    opacity: 0,
-                    fillOpacity: 0
-                };
-                return styleHidden;
-
-            }else{
-                //regular point styling
-                return schoolsMarker;
-            }
-        }
+        //and repopulate it
+        schools = new L.geoJson(schools,{
+            filter:
+                function(feature, layer) {
+                     return (feature.properties.PctMetMinRequirements_Vax <= rangeMax) && (feature.properties.PctMetMinRequirements_Vax >= rangeMin);
+                },
+            pointToLayer: schoolsMarker
+        })
         
     });
+    
+    
+	return map;
 };
+
 
 $(document).ready(createMap);

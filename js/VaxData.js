@@ -1,4 +1,4 @@
-var schools = {"type": "FeatureCollection",
+var VaxData = {"type": "FeatureCollection",
 "crs": { "type": "name", "properties": { "name": "urn:ogc:def:crs:OGC:1.3:CRS84" } },
 "features": [
 { "type": "Feature", "properties": { "SCHOOL": "21st Century eSchool", "DISTRICT": "Middleton-Cross Plains Area", "SCH_TYPE": "Combined Elementary\/Secondary School", "LOW_GRADE": "KG", "HIGH_GRD": 12, "TYPE_DESC": "Public school", "SCH_CAT": "Regular", "CHARTER": "Charter", "FULL_ADDR": "2429 Clark St  Middleton WI  53562-2619", "PHYS_COUNT": "Dane", "CESA": 2, "DPI_KEY": 536, "DIST_CODE": 3549, "SCH_CODE": 800, "UNIQUE": 35490800, "NCES_DIST": 5509510, "NCES_SCH": "2818", "Latitude": 43.102187, "Longitude": -89.510092, "Comment_Vax": null, "PctMetMinRequirements_Vax": null, "PctInProcess_Vax": null, "PctBehindSched_Vax": null, "PctNoRecord_Vax": null, "PctHealthWaiver_Vax": null, "PctRelWaiver_Vax": null, "PctPersWaiver_Vax": null, "PctWaivedAll_Vax": null }, "geometry": { "type": "Point", "coordinates": [ -89.510092, 43.102187 ] } },
