@@ -10,40 +10,17 @@ function getData(map){
     $.ajax("data/WI_PubSchools_VaxData.geojson", {
         dataType: "json",
         success: function(response){
-            
-            //console.log(response)
-            
 			var attributes = processData(response);
-            
-            //console.log(attributes)
-            
             createPoints(response, map, attributes);
             otherLayers(response, map, attributes);
-            
-        
 		}
     });
 };
 
 function createPoints(data,map,attributes){
-
-    //console.log($("#range").min);
-    
-    schools = L.geoJson(data, {
+	schools = L.geoJson(data, {
                 pointToLayer: function (feature, latlng){
-                    
-                //console.log(feature.properties.PctMetMinRequirements_Vax)
-                    
-                    if (feature.properties.PctMetMinRequirements_Vax>30){
-                            return pointToLayer(feature, latlng, attributes);
-
-                    }
-                        
-                    else {
-                        return
-
-                    }
-
+					return pointToLayer(feature, latlng, attributes);
                 }
 			});
 	map.addLayer(schools);
@@ -54,8 +31,6 @@ function processData(data){
     //empty array to hold attributes
     var attributes = [];
 
-    //console.log(data.features.properties)
-    
     //properties of the first feature in the dataset
     var properties = data.features[0].properties;
 
@@ -64,13 +39,9 @@ function processData(data){
         //only take attributes with population values
         if (attribute.indexOf("2") > -1){
             attributes.push(attribute);
-            
-
         };
     };
 
-    //console.log(attributes)
-    
     return attributes;
 };
 
@@ -81,7 +52,7 @@ function pointToLayer(feature, latlng, attributes){
 	var attribute = attributes[0];
 	
 	//create marker options
-	var geojsonMarkerOptions = {
+	var schoolsMarker = {
 		radius: 4,
 		fillColor: "#4D59F7",
 		color: "#EFEFEF",
@@ -91,8 +62,7 @@ function pointToLayer(feature, latlng, attributes){
         zIndex: 600
 	};
 	
-    
-	var layer = L.circleMarker(latlng, geojsonMarkerOptions);
+	var layer = L.circleMarker(latlng, schoolsMarker);
 	
 	//build popup content string starting with city...Example 2.1 line 24
 	var popupContent = "<p><b>School Name:</b> " + feature.properties.SCHOOL + "</p>";
@@ -112,7 +82,7 @@ function pointToLayer(feature, latlng, attributes){
 		offset: new L.point(0, -1)
 	});
 	
-	return layer	
+	return layer		
 };
 
 
@@ -260,28 +230,51 @@ function otherLayers(response, map, attributes){
                 suffix: '% vaccinated'
         })
     });
+    
+    document.getElementById('input-number-min').setAttribute("value", 30);
+    document.getElementById('input-number-max').setAttribute("value", 100);
 
-    var valueInput = document.getElementById('value-input'),
-            valueSpan = document.getElementById('value-span');
-
-    // When the slider value changes, update the input and span
-    range.noUiSlider.on('update', function( values, handle ) {
-        if ( handle ) {
-            valueInput.value = values[handle];
-        } else {
-            valueSpan.innerHTML = values[handle];
-        }
-    });
-
+    var inputNumberMin = document.getElementById('input-number-min'),
+        inputNumberMax = document.getElementById('input-number-max');
+    
     // When the input changes, set the slider value
-    valueInput.addEventListener('change', function(){
+    inputNumberMin.addEventListener('change', function(){
+        range.noUiSlider.set([this.value, null]);
+    });
+    
+    // When the input changes, set the slider value
+    inputNumberMax.addEventListener('change', function(){
         range.noUiSlider.set([null, this.value]);
-        //call filter points
+    });
+    
+    range.noUiSlider.on('update', function( values, handle ) {
+
+        if (handle==0){
+            document.getElementById('input-number-min').value = values[0];
+        } else {
+            document.getElementById('input-number-max').value =  values[1];
+        }
+        
+        rangeMin = document.getElementById('input-number-min').value;
+        rangeMax = document.getElementById('input-number-max').value;
+        
+        //clear the layer:
+        schools.removeLayer(schools);
+        
+        //and repopulate it
+        schools = new L.geoJson(schools,{
+            onEachFeature: pointToLayer,
+            filter:
+                function(feature, layer) {
+                     return (feature.properties.PctMetMinRequirements_Vax <= rangeMax) && (feature.properties.PctMetMinRequirements_Vax >= rangeMin);
+                },
+            pointToLayer: schoolsMarker
+        })
+        
+    });
     
     
 	return map;
-        
-    });
 };
 
 
